@@ -1,0 +1,20 @@
+
+{"namespace": "example.avro",
+ "type": "record",
+ "name": "User",
+ "fields": [
+	{"name": "ID", "type": "string"},
+{"name": "first_name", "type": "string"},
+{"name": "last_name", "type": "string"},
+{"name": "company_name", "type": "string"},
+{"name": "address", "type": "string"},
+{"name": "city", "type": "string"},
+{"name": "county", "type": "string"},
+{"name": "state", "type": "string"},
+{"name": "zip", "type": "string"},
+{"name": "phone1", "type": "string"},
+{"name": "phone2", "type": "string"},
+{"name": "email", "type": "string"},
+{"name": "web", "type": "string"}
+ ]
+}
