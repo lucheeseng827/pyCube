@@ -1,0 +1,42 @@
+#!/usr/bin/python
+from pykafka import KafkaClient,Producer
+import avro.schema
+import io, random
+from avro.io import DatumWriter
+import random
+from  random import random,randint
+from bisect import bisect
+
+
+client = KafkaClient(hosts= "127.0.0.1:9092,192.168.1.1:9093")
+
+topic = client.topics['test']
+
+# Path to user.avsc avro schema
+schema_path="sensor.avsc"
+schema = avro.schema.parse(open(schema_path).read())
+
+def weighted_choice(choices):
+    values, weights = zip(*choices)
+    total = 0
+    cum_weights = []
+    for w in weights:
+        total += w
+        cum_weights.append(total)
+    x = random() * total
+    i = bisect(cum_weights,x)
+    return values[i]
+
+
+x = 0
+# To send messages synchronously
+#with topic.get_sync_producer() as producer:  #synchronously
+with topic.get_producer(delivery_reports=False) as producer:
+    while True:
+        writer = avro.io.DatumWriter(schema)
+        bytes_writer = io.BytesIO()
+        encoder = avro.io.BinaryEncoder(bytes_writer)
+        wc = weighted_choice([('Malfunction',1),('Normal',1000)])
+        writer.write({"temp": str(randint(0,100)),"status":str(wc)}, encoder)
+        raw_bytes = bytes_writer.getvalue()
+        producer.produce(raw_bytes)

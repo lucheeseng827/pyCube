@@ -1,0 +1,54 @@
+#!/usr/bin/python
+from kafka import KafkaConsumer
+import avro.schema
+import avro.io
+import io
+import happybase
+import json,string
+
+
+from pyspark import SparkContext
+
+# To consume messages
+consumer = KafkaConsumer('test', bootstrap_servers=['localhost:9092','localhost:9093'])
+
+
+#def split_data(data):
+#    data1= data.split('"')
+#    datadic={"{}:{}".format(data1[1],data1[1]): data1[3],"{}:{}".format(data1[5],data1[5]): data1[7]}
+#    return datadic
+
+#hbase connection
+connection = happybase.Connection('localhost')
+table = connection.table('test7')
+
+schema_path="sensor.avsc"
+schema = avro.schema.parse(open(schema_path).read())
+x=0
+threshold =70
+for msg in consumer:
+    bytes_reader = io.BytesIO(msg.value)
+    decoder = avro.io.BinaryDecoder(bytes_reader)
+    reader = avro.io.DatumReader(schema)
+    user1 = reader.read(decoder)
+    data = json.dumps(user1)
+    #this is more like hard coded to make put comand works
+    data1= data.split('"')
+    #['{', 'status', ': ', 'Normal', ', ', 'temp', ': ', '60', '}']
+    number = data1[7]
+
+    if int(number) > threshold:
+        status3='Malfunction'
+        print ('%s is Malfunction'%int(number))
+    else:
+        status3='Working'
+        print ('%s is working'%int(number))
+    datadic={"{}:{}".format(data1[1],data1[1]): status3,"{}:{}".format(data1[5],data1[5]): data1[7]}
+
+    #print( ast.literal_eval(json.dumps(user1)) )
+    x= x +1
+    #need to put cf infront of them to get them input
+
+    table.put('{0:08d}'.format(x),datadic)
+    #pass the message in to hbase
+
