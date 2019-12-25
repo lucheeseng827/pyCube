@@ -1,0 +1,17 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: cleanup-pod
+spec:
+  schedule: "*/20 * * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: kubectl-runner
+            image: bitnami/kubectl
+            command: ["sh", "-c", "kubectl delete pods -n pod-name $(kubectl get pods -n pod-name |grep 'Completed'| awk '$3 ' | awk '{print $1}')"]
+          restartPolicy: Never

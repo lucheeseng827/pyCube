@@ -1,0 +1,17 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: cleanup-cronjob
+spec:
+  schedule: "*/20 * * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: kubectl-cronjob-runner
+            image: bitnami/kubectl
+            command: ["sh", "-c", "kubectl delete jobs  $(kubectl get jobs  |grep '0/1'| awk '$3 ' | awk '{print $1}')"]
+          restartPolicy: Never
