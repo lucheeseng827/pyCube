@@ -1,3 +1,4 @@
+#this cron will delete pods under the kubernetes cluster that are marked as "Completed"
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:

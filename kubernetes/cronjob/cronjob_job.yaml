@@ -1,3 +1,4 @@
+#this cron will delete stale/failed jobs which has completion 0/1 at the rate of 20min apart, the failedJobsHistoryLimit and successfulJobsHistoryLimit does not seemed to work for the time being 
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
