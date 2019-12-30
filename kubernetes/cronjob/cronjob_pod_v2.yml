@@ -1,0 +1,18 @@
+#this cron will delete stale/failed pods which has status of Completed,Evicted at the rate of 20min apart, the failedJobsHistoryLimit and successfulJobsHistoryLimit does not seemed to work for the time being 
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: cleanup-cronjob-pods-killer
+spec:
+  schedule: "*/20 * * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: kubectl-cronjob-pods-killer
+            image: bitnami/kubectl
+            command: ["sh", "-c", "kubectl delete pods -n $(kubectl get jobs  |grep 'Completed\|Evicted'| awk '{print $1,$3}')"]
+          restartPolicy: Never
